@@ -49,18 +49,18 @@ export default function AdminPage() {
 
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(body?.error ?? "Failed to export CSV.");
+        throw new Error(body?.error ?? "Failed to export Excel.");
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "groom-evaluations.csv";
+      anchor.download = "martinka-ertekelesek.xls";
       anchor.click();
       window.URL.revokeObjectURL(url);
     } catch (exportError) {
-      setError(exportError instanceof Error ? exportError.message : "Failed to export CSV.");
+      setError(exportError instanceof Error ? exportError.message : "Failed to export Excel.");
     }
   }
 
@@ -193,7 +193,7 @@ export default function AdminPage() {
                 className="flex h-12 min-w-0 items-center justify-center gap-2 rounded-2xl bg-brass px-4 text-xs font-black uppercase tracking-[0.12em] text-black shadow-glow transition hover:bg-brass/90 sm:px-5 sm:text-sm sm:tracking-[0.14em]"
               >
                 <Download size={19} />
-                CSV export
+                Excel export
               </button>
             </div>
 

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 import type { SubmissionRow } from "@/lib/types";
 
-const delimiter = ";";
 const columns: Array<{ key: keyof SubmissionRow; label: string; format?: (value: SubmissionRow[keyof SubmissionRow]) => string }> = [
   { key: "id", label: "Azonosító" },
   { key: "created_at", label: "Beküldés ideje", format: (value) => formatDate(String(value ?? "")) },
@@ -37,29 +36,57 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error?.message ?? "Failed to export submissions." }, { status: 500 });
   }
 
-  const csv = [
-    "sep=;",
-    columns.map((column) => csvEscape(column.label)).join(delimiter),
-    ...(data as SubmissionRow[]).map((row) =>
-      columns
+  const rows = data as SubmissionRow[];
+  const tableHead = columns.map((column) => `<th>${htmlEscape(column.label)}</th>`).join("");
+  const tableRows = rows
+    .map((row) => {
+      const cells = columns
         .map((column) => {
           const rawValue = row[column.key];
-          return csvEscape(column.format ? column.format(rawValue) : String(rawValue ?? ""));
+          const value = column.format ? column.format(rawValue) : String(rawValue ?? "");
+          return `<td>${htmlEscape(value)}</td>`;
         })
-        .join(delimiter)
-    )
-  ].join("\r\n");
+        .join("");
 
-  return new NextResponse(`\uFEFF${csv}`, {
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+
+  const workbook = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font-family: Arial, sans-serif; }
+      table { border-collapse: collapse; }
+      th { background: #0e0e0e; color: #f8f8f8; font-weight: 700; }
+      th, td { border: 1px solid #999; padding: 8px 10px; white-space: nowrap; }
+      td { mso-number-format: "\\@"; }
+    </style>
+  </head>
+  <body>
+    <table>
+      <thead><tr>${tableHead}</tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  </body>
+</html>`;
+
+  return new NextResponse(`\uFEFF${workbook}`, {
     headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=\"martinka-ertekelesek.csv\""
+      "Content-Type": "application/vnd.ms-excel; charset=utf-8",
+      "Content-Disposition": "attachment; filename=\"martinka-ertekelesek.xls\""
     }
   });
 }
 
-function csvEscape(value: string) {
-  return `"${value.replaceAll("\"", "\"\"")}"`;
+function htmlEscape(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function formatDate(value: string) {
