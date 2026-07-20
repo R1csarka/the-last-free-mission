@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { calculateAverages, resultLabel } from "@/lib/scoring";
 import type { RatingAverages, RatingKey, SubmissionPayload } from "@/lib/types";
 
-type QuizStep = "home" | "identity" | "ratings" | "beer" | "husband" | "message" | "loading" | "result";
+type QuizStep = "home" | "identity" | "ratingsA" | "ratingsB" | "beer" | "husband" | "message" | "loading" | "result";
 type NullableRatingMap = Record<RatingKey, number | null>;
 
 const ratingLabels: Array<{ key: RatingKey; label: string }> = [
@@ -26,7 +26,7 @@ const loadingMessages = [
   "Generating report..."
 ];
 
-const orderedSteps: QuizStep[] = ["home", "identity", "ratings", "beer", "husband", "message"];
+const orderedSteps: QuizStep[] = ["home", "identity", "ratingsA", "ratingsB", "beer", "husband", "message"];
 
 export default function HomePage() {
   const [step, setStep] = useState<QuizStep>("home");
@@ -50,8 +50,12 @@ export default function HomePage() {
 
   const stepIndex = orderedSteps.indexOf(step);
   const canContinue = useMemo(() => {
-    if (step === "ratings") {
-      return Object.values(ratings).every((value) => value !== null);
+    if (step === "ratingsA") {
+      return ratings.looks !== null && ratings.style !== null;
+    }
+
+    if (step === "ratingsB") {
+      return ratings.humor !== null && ratings.charisma !== null;
     }
 
     if (step === "beer") {
@@ -156,17 +160,17 @@ export default function HomePage() {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-asphalt text-white">
+    <main className="relative min-h-dvh overflow-x-hidden bg-asphalt text-white">
       <Background />
 
-      <section className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-5 sm:px-6">
+      <section className="relative z-10 flex min-h-dvh items-start justify-center px-4 py-3 sm:items-center sm:px-6 sm:py-5">
         <div className="w-full max-w-[460px]">
-          <div className="mb-4 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.22em] text-champagne/70">
+          <div className="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.22em] text-champagne/70 sm:mb-4 sm:text-[11px]">
             <span>Rockstar Evaluations</span>
             <span className="rounded-full border border-brass/40 bg-black/40 px-3 py-1 text-brass">NFC</span>
           </div>
 
-          <div className="glass min-h-[640px] rounded-[28px] p-5 shadow-gold sm:p-6">
+          <div className="glass h-[calc(100dvh-52px)] min-h-[520px] max-h-[680px] overflow-hidden rounded-[24px] p-4 shadow-gold sm:rounded-[28px] sm:p-6">
             <AnimatePresence mode="wait">
               {step === "home" && (
                 <StepFrame key="home">
@@ -222,15 +226,37 @@ export default function HomePage() {
                 </StepFrame>
               )}
 
-              {step === "ratings" && (
-                <StepFrame key="ratings">
+              {step === "ratingsA" && (
+                <StepFrame key="ratingsA">
                   <QuestionShell
                     eyebrow="Question 2"
                     title="Rate Martin."
                     footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
                   >
-                    <div className="space-y-4">
-                      {ratingLabels.map(({ key, label }) => (
+                    <div className="space-y-3">
+                      {ratingLabels.slice(0, 2).map(({ key, label }) => (
+                        <RatingControl
+                          key={key}
+                          label={label}
+                          testId={`rating-${key}`}
+                          value={ratings[key]}
+                          onChange={(value) => setRatings((current) => ({ ...current, [key]: value }))}
+                        />
+                      ))}
+                    </div>
+                  </QuestionShell>
+                </StepFrame>
+              )}
+
+              {step === "ratingsB" && (
+                <StepFrame key="ratingsB">
+                  <QuestionShell
+                    eyebrow="Question 2"
+                    title="Rate Martin."
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
+                  >
+                    <div className="space-y-3">
+                      {ratingLabels.slice(2).map(({ key, label }) => (
                         <RatingControl
                           key={key}
                           label={label}
@@ -278,7 +304,6 @@ export default function HomePage() {
                       testId="rating-husband"
                       value={husbandIndex}
                       onChange={setHusbandIndex}
-                      large
                     />
                   </QuestionShell>
                 </StepFrame>
@@ -329,7 +354,7 @@ export default function HomePage() {
                   <div className="flex h-full flex-col gap-3">
                     <div>
                       <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">MISSION COMPLETE</p>
-                      <h2 className="mission-title mt-2 font-display text-[38px] uppercase leading-[0.9] text-champagne">
+                      <h2 className="mission-title mt-2 font-display text-[34px] uppercase leading-[0.9] text-champagne sm:text-[38px]">
                         Official Groom Analysis
                       </h2>
                     </div>
@@ -386,7 +411,7 @@ function StepFrame({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       exit={{ opacity: 0, y: -18, filter: "blur(8px)" }}
       transition={{ duration: 0.32, ease: "easeOut" }}
-      className="h-[600px]"
+      className="h-full min-h-0"
     >
       {children}
     </motion.div>
@@ -405,12 +430,14 @@ function QuestionShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.28em] text-brass">{eyebrow}</p>
-        <h2 className="mt-3 text-balance text-4xl font-black uppercase leading-[1.02] text-white">{title}</h2>
+        <h2 className="mt-2 text-balance text-[30px] font-black uppercase leading-[1.02] text-white sm:mt-3 sm:text-4xl">
+          {title}
+        </h2>
       </div>
-      <div className="flex flex-1 flex-col justify-center py-6">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col justify-center py-4 sm:py-6">{children}</div>
       {footer}
     </div>
   );
@@ -420,28 +447,26 @@ function RatingControl({
   label,
   testId,
   value,
-  onChange,
-  large = false
+  onChange
 }: {
   label: string;
   testId: string;
   value: number | null;
   onChange: (value: number) => void;
-  large?: boolean;
 }) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-black uppercase tracking-[0.2em] text-champagne/70">{label}</span>
-        <span className="text-sm font-black text-brass">{value ?? "-"}/10</span>
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-xs font-black uppercase tracking-[0.18em] text-champagne/70 sm:text-sm">{label}</span>
+        <span className="text-xs font-black text-brass sm:text-sm">{value ?? "-"}/10</span>
       </div>
-      <div data-testid={testId} className={`grid grid-cols-5 gap-2 ${large ? "sm:grid-cols-10" : ""}`}>
+      <div data-testid={testId} className="grid grid-cols-5 gap-1.5 sm:grid-cols-10 sm:gap-1">
         {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
           <button
             key={rating}
             type="button"
             onClick={() => onChange(rating)}
-            className={`h-12 rounded-xl border text-base font-black transition active:scale-95 ${
+            className={`h-10 rounded-lg border text-xs font-black transition active:scale-95 sm:h-12 sm:rounded-xl sm:text-base ${
               value === rating
                 ? "border-brass bg-brass text-black shadow-glow"
                 : "border-champagne/14 bg-white/[0.06] text-champagne hover:border-brass/60"
@@ -496,12 +521,12 @@ function StepControls({
   canContinue: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[72px_1fr] gap-3">
+    <div className="grid grid-cols-[64px_1fr] gap-3 sm:grid-cols-[72px_1fr]">
       <button
         type="button"
         onClick={onBack}
         data-testid="back-step"
-        className="grid h-16 place-items-center rounded-2xl border border-champagne/16 bg-white/[0.06] text-champagne transition hover:border-champagne/35 active:scale-95"
+        className="grid h-14 place-items-center rounded-2xl border border-champagne/16 bg-white/[0.06] text-champagne transition hover:border-champagne/35 active:scale-95 sm:h-16"
         aria-label="Back"
       >
         <ChevronLeft size={28} />
@@ -531,7 +556,7 @@ function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       data-testid={testId}
-      className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-brass px-6 text-lg font-black uppercase tracking-[0.16em] text-black shadow-glow transition hover:bg-brass/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-champagne/20 disabled:text-champagne/35 disabled:shadow-none"
+      className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-brass px-6 text-base font-black uppercase tracking-[0.16em] text-black shadow-glow transition hover:bg-brass/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-champagne/20 disabled:text-champagne/35 disabled:shadow-none sm:h-16 sm:text-lg"
     >
       {children}
     </button>
