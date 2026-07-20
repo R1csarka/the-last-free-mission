@@ -102,14 +102,16 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-asphalt text-white">
+    <main className="relative min-h-dvh overflow-x-hidden bg-asphalt text-white">
       <Background />
 
-      <section className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-5 sm:px-6 lg:px-8">
+      <section className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl min-w-0 flex-col px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
         <header className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-brass">Admin Dashboard</p>
-            <h1 className="mission-title mt-2 font-display text-4xl uppercase leading-none text-champagne sm:text-6xl">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-brass sm:text-xs sm:tracking-[0.28em]">
+              Admin Dashboard
+            </p>
+            <h1 className="mission-title mt-2 font-display text-[38px] uppercase leading-none text-champagne sm:text-6xl">
               Groom Control
             </h1>
           </div>
@@ -157,7 +159,7 @@ export default function AdminPage() {
             {error && <p className="mt-4 text-sm font-bold text-dangerPink">{error}</p>}
           </motion.form>
         ) : (
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="grid gap-4">
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="grid min-w-0 gap-4">
             {error && (
               <div className="rounded-2xl border border-dangerPink/35 bg-dangerPink/10 p-4 text-sm font-bold text-dangerPink">
                 {error}
@@ -175,12 +177,12 @@ export default function AdminPage() {
               <MetricCard label="Sör nem %" value={`${stats.beerNoPercent}%`} />
             </div>
 
-            <div className="flex flex-col justify-end gap-3 sm:flex-row">
+            <div className="grid gap-3 sm:flex sm:justify-end">
               <button
                 type="button"
                 onClick={() => void resetSubmissions()}
                 disabled={resetting || stats.total === 0}
-                className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-dangerPink/45 bg-dangerPink/12 px-5 text-sm font-black uppercase tracking-[0.14em] text-dangerPink transition hover:bg-dangerPink/18 disabled:cursor-not-allowed disabled:border-champagne/12 disabled:bg-white/[0.04] disabled:text-champagne/30"
+                className="flex h-12 min-w-0 items-center justify-center gap-2 rounded-2xl border border-dangerPink/45 bg-dangerPink/12 px-4 text-xs font-black uppercase tracking-[0.1em] text-dangerPink transition hover:bg-dangerPink/18 disabled:cursor-not-allowed disabled:border-champagne/12 disabled:bg-white/[0.04] disabled:text-champagne/30 sm:px-5 sm:text-sm sm:tracking-[0.14em]"
               >
                 <Trash2 size={18} />
                 {resetting ? "Törlés..." : "Összes válasz törlése"}
@@ -188,17 +190,31 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => void exportCsv()}
-                className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brass px-5 text-sm font-black uppercase tracking-[0.14em] text-black shadow-glow transition hover:bg-brass/90"
+                className="flex h-12 min-w-0 items-center justify-center gap-2 rounded-2xl bg-brass px-4 text-xs font-black uppercase tracking-[0.12em] text-black shadow-glow transition hover:bg-brass/90 sm:px-5 sm:text-sm sm:tracking-[0.14em]"
               >
                 <Download size={19} />
                 CSV export
               </button>
             </div>
 
-            <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
-              <div className="glass rounded-[28px] p-4">
-                <h2 className="mb-4 text-xl font-black uppercase tracking-[0.08em]">Legutóbbi válaszok</h2>
-                <div className="overflow-x-auto">
+            <section className="grid min-w-0 gap-4 lg:grid-cols-[1.35fr_0.95fr]">
+              <div className="glass min-w-0 rounded-[24px] p-3 sm:rounded-[28px] sm:p-4">
+                <h2 className="mb-4 text-lg font-black uppercase tracking-[0.06em] sm:text-xl sm:tracking-[0.08em]">
+                  Legutóbbi válaszok
+                </h2>
+
+                <div className="grid gap-3 md:hidden">
+                  {stats.latest.map((submission) => (
+                    <SubmissionCard key={submission.id} submission={submission} />
+                  ))}
+                  {stats.latest.length === 0 && (
+                    <p className="rounded-2xl border border-champagne/12 bg-black/35 p-4 text-sm font-semibold text-champagne/60">
+                      Még nincs válasz.
+                    </p>
+                  )}
+                </div>
+
+                <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left">
                     <thead>
                       <tr className="text-xs font-black uppercase tracking-[0.16em] text-champagne/48">
@@ -226,10 +242,12 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="glass rounded-[28px] p-4">
+              <div className="glass min-w-0 rounded-[24px] p-3 sm:rounded-[28px] sm:p-4">
                 <div className="mb-4 flex items-center gap-2">
-                  <MessageSquareText className="text-brass" size={22} />
-                  <h2 className="text-xl font-black uppercase tracking-[0.08em]">Üzenetek a menyasszonynak</h2>
+                  <MessageSquareText className="shrink-0 text-brass" size={22} />
+                  <h2 className="min-w-0 text-lg font-black uppercase leading-tight tracking-[0.04em] sm:text-xl sm:tracking-[0.08em]">
+                    Üzenetek a menyasszonynak
+                  </h2>
                 </div>
                 <div className="grid max-h-[600px] gap-3 overflow-y-auto pr-1">
                   {stats.messages.map((message) => (
@@ -267,12 +285,47 @@ function Background() {
 
 function MetricCard({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="glass rounded-2xl p-4">
+    <div className="glass min-w-0 rounded-2xl p-4">
       <div className="mb-4 flex items-center justify-between text-brass">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-champagne/55">{label}</p>
         {icon}
       </div>
       <p className="text-4xl font-black text-white">{value}</p>
+    </div>
+  );
+}
+
+function SubmissionCard({ submission }: { submission: SubmissionRow }) {
+  return (
+    <article className="rounded-2xl border border-champagne/12 bg-black/35 p-4 text-sm font-bold text-champagne/84">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-lg font-black text-white">{submission.nickname || "Névtelen"}</p>
+          <p className="mt-1 text-[11px] font-black uppercase tracking-[0.14em] text-champagne/48">
+            {formatDate(submission.created_at)}
+          </p>
+        </div>
+        <span className="rounded-full border border-brass/35 bg-brass/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-brass">
+          {submission.beer_yes_no ? "Sör: igen" : "Sör: nem"}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <MobileScore label="Megjelenés" value={submission.looks} />
+        <MobileScore label="Stílus" value={submission.style} />
+        <MobileScore label="Kisugárzás" value={submission.humor} />
+        <MobileScore label="Első benyomás" value={submission.charisma} />
+        <MobileScore label="Férj index" value={submission.husband_index} />
+      </div>
+    </article>
+  );
+}
+
+function MobileScore({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-champagne/10 bg-white/[0.04] px-3 py-2">
+      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-champagne/48">{label}</p>
+      <p className="mt-1 text-xl font-black text-white">{value}</p>
     </div>
   );
 }
