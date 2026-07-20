@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 import type { SubmissionRow } from "@/lib/types";
 
-const columns: Array<keyof SubmissionRow> = [
-  "id",
-  "created_at",
-  "nickname",
-  "looks",
-  "style",
-  "humor",
-  "charisma",
-  "beer_yes_no",
-  "husband_index",
-  "message_to_bride"
+const delimiter = ";";
+const columns: Array<{ key: keyof SubmissionRow; label: string; format?: (value: SubmissionRow[keyof SubmissionRow]) => string }> = [
+  { key: "id", label: "Azonosító" },
+  { key: "created_at", label: "Beküldés ideje", format: (value) => formatDate(String(value ?? "")) },
+  { key: "nickname", label: "Név" },
+  { key: "looks", label: "Megjelenés" },
+  { key: "style", label: "Stílus" },
+  { key: "humor", label: "Kisugárzás" },
+  { key: "charisma", label: "Első benyomás" },
+  { key: "beer_yes_no", label: "Sör Martinnal", format: (value) => (value ? "IGEN" : "NEM") },
+  { key: "husband_index", label: "Férj index" },
+  { key: "message_to_bride", label: "Üzenet a menyasszonynak" }
 ];
 
 export async function GET(request: Request) {
@@ -37,20 +38,38 @@ export async function GET(request: Request) {
   }
 
   const csv = [
-    columns.join(","),
+    "sep=;",
+    columns.map((column) => csvEscape(column.label)).join(delimiter),
     ...(data as SubmissionRow[]).map((row) =>
-      columns.map((column) => csvEscape(String(row[column] ?? ""))).join(",")
+      columns
+        .map((column) => {
+          const rawValue = row[column.key];
+          return csvEscape(column.format ? column.format(rawValue) : String(rawValue ?? ""));
+        })
+        .join(delimiter)
     )
-  ].join("\n");
+  ].join("\r\n");
 
-  return new NextResponse(csv, {
+  return new NextResponse(`\uFEFF${csv}`, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=\"groom-evaluations.csv\""
+      "Content-Disposition": "attachment; filename=\"martinka-ertekelesek.csv\""
     }
   });
 }
 
 function csvEscape(value: string) {
   return `"${value.replaceAll("\"", "\"\"")}"`;
+}
+
+function formatDate(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("hu-HU", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Europe/Budapest"
+  }).format(new Date(value));
 }

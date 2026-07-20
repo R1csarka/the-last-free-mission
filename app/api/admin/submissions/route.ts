@@ -45,3 +45,27 @@ export async function GET(request: Request) {
 
   return NextResponse.json(stats);
 }
+
+export async function DELETE(request: Request) {
+  const password = request.headers.get("x-admin-password");
+
+  if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (!isSupabaseConfigured) {
+    return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase
+    .from("groom_evaluations")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000");
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

@@ -10,20 +10,20 @@ type QuizStep = "home" | "identity" | "ratingsA" | "ratingsB" | "beer" | "husban
 type NullableRatingMap = Record<RatingKey, number | null>;
 
 const ratingLabels: Array<{ key: RatingKey; label: string }> = [
-  { key: "looks", label: "Looks" },
-  { key: "style", label: "Style" },
-  { key: "humor", label: "Humor" },
-  { key: "charisma", label: "Charisma" }
+  { key: "looks", label: "Megjelenés" },
+  { key: "style", label: "Stílus" },
+  { key: "humor", label: "Kisugárzás" },
+  { key: "charisma", label: "Első benyomás" }
 ];
 
 const loadingMessages = [
-  "Connecting to Rockstar Social Club...",
-  "Scanning candidate...",
-  "Checking criminal records...",
-  "Checking relationship stability...",
-  "Evaluating husband potential...",
-  "Consulting Fanni...",
-  "Generating report..."
+  "Kapcsolódás a Rockstar Social Clubhoz...",
+  "Jelölt beolvasása...",
+  "Bűnügyi előélet ellenőrzése...",
+  "Kapcsolati stabilitás vizsgálata...",
+  "Férj potenciál kiértékelése...",
+  "Fanni megkérdezése...",
+  "Jelentés generálása..."
 ];
 
 const orderedSteps: QuizStep[] = ["home", "identity", "ratingsA", "ratingsB", "beer", "husband", "message"];
@@ -206,19 +206,19 @@ export default function HomePage() {
               {step === "identity" && (
                 <StepFrame key="identity">
                   <QuestionShell
-                    eyebrow="Question 1"
-                    title="Who are you?"
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue />}
+                    eyebrow="1. kérdés"
+                    title="Ki vagy?"
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Tovább" canContinue />}
                   >
                     <label className="block">
                       <span className="mb-3 block text-sm font-black uppercase tracking-[0.18em] text-champagne/60">
-                        Optional agent alias
+                        Opcionális fedőnév
                       </span>
                       <input
                         value={nickname}
                         onChange={(event) => setNickname(event.target.value)}
                         maxLength={80}
-                        placeholder="Nickname or full name"
+                        placeholder="Becenév vagy teljes név"
                         className="h-16 w-full rounded-2xl border border-champagne/18 bg-black/55 px-5 text-lg font-bold text-white outline-none transition focus:border-brass focus:shadow-glow"
                       />
                     </label>
@@ -229,9 +229,9 @@ export default function HomePage() {
               {step === "ratingsA" && (
                 <StepFrame key="ratingsA">
                   <QuestionShell
-                    eyebrow="Question 2"
-                    title="Rate Martin."
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
+                    eyebrow="2. kérdés"
+                    title="Értékeld Martint."
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Tovább" canContinue={canContinue} />}
                   >
                     <div className="space-y-3">
                       {ratingLabels.slice(0, 2).map(({ key, label }) => (
@@ -251,9 +251,9 @@ export default function HomePage() {
               {step === "ratingsB" && (
                 <StepFrame key="ratingsB">
                   <QuestionShell
-                    eyebrow="Question 2"
-                    title="Rate Martin."
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
+                    eyebrow="2. kérdés"
+                    title="Értékeld Martint."
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Tovább" canContinue={canContinue} />}
                   >
                     <div className="space-y-3">
                       {ratingLabels.slice(2).map(({ key, label }) => (
@@ -273,16 +273,16 @@ export default function HomePage() {
               {step === "beer" && (
                 <StepFrame key="beer">
                   <QuestionShell
-                    eyebrow="Question 3"
-                    title="Would you drink a beer with Martin?"
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
+                    eyebrow="3. kérdés"
+                    title="Meginnál egy sört Martinnal?"
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Tovább" canContinue={canContinue} />}
                   >
                     <div className="grid grid-cols-2 gap-3">
                       <ChoiceButton testId="beer-yes" active={beer === true} onClick={() => setBeer(true)}>
-                        YES
+                        IGEN
                       </ChoiceButton>
                       <ChoiceButton testId="beer-no" active={beer === false} onClick={() => setBeer(false)}>
-                        NO
+                        NEM
                       </ChoiceButton>
                     </div>
                     <div className="mt-8 flex justify-center text-brass">
@@ -295,12 +295,12 @@ export default function HomePage() {
               {step === "husband" && (
                 <StepFrame key="husband">
                   <QuestionShell
-                    eyebrow="Question 4"
-                    title="How good of a husband do you think Martin will be?"
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Next" canContinue={canContinue} />}
+                    eyebrow="4. kérdés"
+                    title="Szerinted milyen férj lesz Martin?"
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Tovább" canContinue={canContinue} />}
                   >
                     <RatingControl
-                      label="Husband Index"
+                      label="Férj index"
                       testId="rating-husband"
                       value={husbandIndex}
                       onChange={setHusbandIndex}
@@ -312,15 +312,15 @@ export default function HomePage() {
               {step === "message" && (
                 <StepFrame key="message">
                   <QuestionShell
-                    eyebrow="Question 5"
-                    title="Message to the bride"
-                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Submit" canContinue />}
+                    eyebrow="5. kérdés"
+                    title="Üzenet a menyasszonynak"
+                    footer={<StepControls onBack={goBack} onNext={goNext} nextLabel="Beküldés" canContinue />}
                   >
                     <textarea
                       value={message}
                       onChange={(event) => setMessage(event.target.value.slice(0, 150))}
                       maxLength={150}
-                      placeholder="Optional. Maximum 150 characters."
+                      placeholder="Opcionális. Maximum 150 karakter."
                       data-testid="bride-message"
                       className="min-h-44 w-full resize-none rounded-2xl border border-champagne/18 bg-black/55 p-5 text-lg font-bold text-white outline-none transition focus:border-brass focus:shadow-glow"
                     />
@@ -341,7 +341,7 @@ export default function HomePage() {
                     >
                       <Crosshair size={52} strokeWidth={1.4} />
                     </motion.div>
-                    <p className="text-sm font-black uppercase tracking-[0.28em] text-champagne/55">Processing</p>
+                    <p className="text-sm font-black uppercase tracking-[0.28em] text-champagne/55">Feldolgozás</p>
                     <p className="mt-4 min-h-16 text-3xl font-black uppercase leading-tight text-white">
                       {loadingMessages[loadingIndex]}
                     </p>
@@ -353,32 +353,33 @@ export default function HomePage() {
                 <StepFrame key="result">
                   <div className="flex h-full flex-col gap-3">
                     <div>
-                      <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">MISSION COMPLETE</p>
+                      <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">KÜLDETÉS TELJESÍTVE</p>
                       <h2 className="mission-title mt-2 font-display text-[34px] uppercase leading-[0.9] text-champagne sm:text-[38px]">
-                        Official Groom Analysis
+                        Hivatalos vőlegény elemzés
                       </h2>
                     </div>
 
                     <div className="grid gap-2">
-                      <ScoreRow label="Looks" value={result.averages.looks} />
-                      <ScoreRow label="Style" value={result.averages.style} />
-                      <ScoreRow label="Humor" value={result.averages.humor} />
-                      <ScoreRow label="Charisma" value={result.averages.charisma} />
-                      <ScoreRow label="Husband Index" value={result.averages.husband_index} />
+                      <ScoreRow label="Megjelenés" value={result.averages.looks} />
+                      <ScoreRow label="Stílus" value={result.averages.style} />
+                      <ScoreRow label="Kisugárzás" value={result.averages.humor} />
+                      <ScoreRow label="Első benyomás" value={result.averages.charisma} />
+                      <ScoreRow label="Férj index" value={result.averages.husband_index} />
                     </div>
 
                     <div className="approval-glow mt-auto rounded-2xl border border-approval/40 bg-approval/12 p-3 text-center">
                       <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-approval text-black">
                         <ShieldCheck size={30} />
                       </div>
-                      <p className="text-xl font-black uppercase tracking-[0.08em] text-approval">{result.verdict}</p>
+                      <p className="text-xl font-black uppercase tracking-[0.08em] text-approval">
+                        {getHungarianVerdict(result.verdict)}
+                      </p>
                       <p className="mt-2 text-balance text-sm font-semibold leading-5 text-champagne/85">
-                        According to the evaluation, Martin is suitable for marriage. Fanni&apos;s decision appears
-                        justified.
+                        Az értékelés alapján Martin házasságra alkalmas. Fanni döntése indokoltnak tűnik.
                       </p>
                       {(!result.saved || result.demo) && (
                         <p className="mt-3 text-xs font-bold uppercase tracking-[0.14em] text-champagne/45">
-                          Demo result shown until Supabase is configured.
+                          Demó eredmény látható, amíg a Supabase nincs beállítva.
                         </p>
                       )}
                     </div>
@@ -457,7 +458,9 @@ function RatingControl({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs font-black uppercase tracking-[0.18em] text-champagne/70 sm:text-sm">{label}</span>
+        <span className="text-xs font-black uppercase tracking-[0.12em] text-champagne/70 sm:text-sm sm:tracking-[0.18em]">
+          {label}
+        </span>
         <span className="text-xs font-black text-brass sm:text-sm">{value ?? "-"}/10</span>
       </div>
       <div data-testid={testId} className="grid grid-cols-5 gap-1.5 sm:grid-cols-10 sm:gap-1">
@@ -479,6 +482,10 @@ function RatingControl({
       </div>
     </div>
   );
+}
+
+function getHungarianVerdict(verdict: string) {
+  return verdict === "APPROVED" ? "JÓVÁHAGYVA" : "JÓVÁHAGYVA KISEBB FIGYELMEZTETÉSEKKEL";
 }
 
 function ChoiceButton({

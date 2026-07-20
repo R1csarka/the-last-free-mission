@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Lock, MessageSquareText, RefreshCw, ShieldCheck, Users } from "lucide-react";
+import { Download, Lock, MessageSquareText, RefreshCw, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import type { AdminStats, SubmissionRow } from "@/lib/types";
 
@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   async function loadStats(event?: React.FormEvent) {
     event?.preventDefault();
@@ -60,6 +61,43 @@ export default function AdminPage() {
       window.URL.revokeObjectURL(url);
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "Failed to export CSV.");
+    }
+  }
+
+  async function resetSubmissions() {
+    if (!stats?.total) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Biztosan törlöd az összes választ? Ez ${stats.total} beküldést töröl, és nem lehet visszavonni.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setResetting(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/submissions", {
+        method: "DELETE",
+        headers: {
+          "x-admin-password": password
+        }
+      });
+
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? "Nem sikerült törölni a válaszokat.");
+      }
+
+      await loadStats();
+    } catch (resetError) {
+      setError(resetError instanceof Error ? resetError.message : "Nem sikerült törölni a válaszokat.");
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -127,42 +165,51 @@ export default function AdminPage() {
             )}
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard icon={<Users size={24} />} label="Total submissions" value={stats.total.toString()} />
-              <MetricCard label="Average Looks" value={stats.averages.looks.toFixed(1)} />
-              <MetricCard label="Average Style" value={stats.averages.style.toFixed(1)} />
-              <MetricCard label="Average Humor" value={stats.averages.humor.toFixed(1)} />
-              <MetricCard label="Average Charisma" value={stats.averages.charisma.toFixed(1)} />
-              <MetricCard label="Average Husband Index" value={stats.averages.husband_index.toFixed(1)} />
-              <MetricCard label="Beer Yes %" value={`${stats.beerYesPercent}%`} />
-              <MetricCard label="Beer No %" value={`${stats.beerNoPercent}%`} />
+              <MetricCard icon={<Users size={24} />} label="Összes válasz" value={stats.total.toString()} />
+              <MetricCard label="Átlag megjelenés" value={stats.averages.looks.toFixed(1)} />
+              <MetricCard label="Átlag stílus" value={stats.averages.style.toFixed(1)} />
+              <MetricCard label="Átlag kisugárzás" value={stats.averages.humor.toFixed(1)} />
+              <MetricCard label="Átlag első benyomás" value={stats.averages.charisma.toFixed(1)} />
+              <MetricCard label="Átlag férj index" value={stats.averages.husband_index.toFixed(1)} />
+              <MetricCard label="Sör igen %" value={`${stats.beerYesPercent}%`} />
+              <MetricCard label="Sör nem %" value={`${stats.beerNoPercent}%`} />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col justify-end gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => void resetSubmissions()}
+                disabled={resetting || stats.total === 0}
+                className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-dangerPink/45 bg-dangerPink/12 px-5 text-sm font-black uppercase tracking-[0.14em] text-dangerPink transition hover:bg-dangerPink/18 disabled:cursor-not-allowed disabled:border-champagne/12 disabled:bg-white/[0.04] disabled:text-champagne/30"
+              >
+                <Trash2 size={18} />
+                {resetting ? "Törlés..." : "Összes válasz törlése"}
+              </button>
               <button
                 type="button"
                 onClick={() => void exportCsv()}
                 className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brass px-5 text-sm font-black uppercase tracking-[0.14em] text-black shadow-glow transition hover:bg-brass/90"
               >
                 <Download size={19} />
-                Export CSV
+                CSV export
               </button>
             </div>
 
             <section className="grid gap-4 lg:grid-cols-[1.35fr_0.95fr]">
               <div className="glass rounded-[28px] p-4">
-                <h2 className="mb-4 text-xl font-black uppercase tracking-[0.08em]">Latest submissions</h2>
+                <h2 className="mb-4 text-xl font-black uppercase tracking-[0.08em]">Legutóbbi válaszok</h2>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left">
                     <thead>
                       <tr className="text-xs font-black uppercase tracking-[0.16em] text-champagne/48">
-                        <th className="px-3 py-2">Agent</th>
-                        <th className="px-3 py-2">Looks</th>
-                        <th className="px-3 py-2">Style</th>
-                        <th className="px-3 py-2">Humor</th>
-                        <th className="px-3 py-2">Charisma</th>
-                        <th className="px-3 py-2">Beer</th>
-                        <th className="px-3 py-2">Husband</th>
-                        <th className="px-3 py-2">Time</th>
+                        <th className="px-3 py-2">Név</th>
+                        <th className="px-3 py-2">Megjelenés</th>
+                        <th className="px-3 py-2">Stílus</th>
+                        <th className="px-3 py-2">Kisugárzás</th>
+                        <th className="px-3 py-2">Első benyomás</th>
+                        <th className="px-3 py-2">Sör</th>
+                        <th className="px-3 py-2">Férj</th>
+                        <th className="px-3 py-2">Idő</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -173,7 +220,7 @@ export default function AdminPage() {
                   </table>
                   {stats.latest.length === 0 && (
                     <p className="rounded-2xl border border-champagne/12 bg-black/35 p-4 text-sm font-semibold text-champagne/60">
-                      No submissions yet.
+                      Még nincs válasz.
                     </p>
                   )}
                 </div>
@@ -182,20 +229,20 @@ export default function AdminPage() {
               <div className="glass rounded-[28px] p-4">
                 <div className="mb-4 flex items-center gap-2">
                   <MessageSquareText className="text-brass" size={22} />
-                  <h2 className="text-xl font-black uppercase tracking-[0.08em]">Messages to the bride</h2>
+                  <h2 className="text-xl font-black uppercase tracking-[0.08em]">Üzenetek a menyasszonynak</h2>
                 </div>
                 <div className="grid max-h-[600px] gap-3 overflow-y-auto pr-1">
                   {stats.messages.map((message) => (
                     <article key={message.id} className="rounded-2xl border border-champagne/12 bg-black/35 p-4">
                       <p className="text-sm font-semibold leading-6 text-champagne/85">{message.message_to_bride}</p>
                       <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-brass">
-                        {message.nickname || "Anonymous"} · {formatDate(message.created_at)}
+                        {message.nickname || "Névtelen"} · {formatDate(message.created_at)}
                       </p>
                     </article>
                   ))}
                   {stats.messages.length === 0 && (
                     <p className="rounded-2xl border border-champagne/12 bg-black/35 p-4 text-sm font-semibold text-champagne/60">
-                      No bride messages yet.
+                      Még nincs menyasszonynak szóló üzenet.
                     </p>
                   )}
                 </div>
@@ -233,12 +280,12 @@ function MetricCard({ label, value, icon }: { label: string; value: string; icon
 function SubmissionTableRow({ submission }: { submission: SubmissionRow }) {
   return (
     <tr className="bg-black/35 text-sm font-bold text-champagne/84">
-      <td className="rounded-l-xl px-3 py-3 text-white">{submission.nickname || "Anonymous"}</td>
+      <td className="rounded-l-xl px-3 py-3 text-white">{submission.nickname || "Névtelen"}</td>
       <td className="px-3 py-3">{submission.looks}</td>
       <td className="px-3 py-3">{submission.style}</td>
       <td className="px-3 py-3">{submission.humor}</td>
       <td className="px-3 py-3">{submission.charisma}</td>
-      <td className="px-3 py-3">{submission.beer_yes_no ? "YES" : "NO"}</td>
+      <td className="px-3 py-3">{submission.beer_yes_no ? "IGEN" : "NEM"}</td>
       <td className="px-3 py-3">{submission.husband_index}</td>
       <td className="rounded-r-xl px-3 py-3 text-champagne/54">{formatDate(submission.created_at)}</td>
     </tr>
@@ -246,7 +293,7 @@ function SubmissionTableRow({ submission }: { submission: SubmissionRow }) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("hu", {
     month: "short",
     day: "2-digit",
     hour: "2-digit",
