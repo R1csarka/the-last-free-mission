@@ -351,15 +351,17 @@ export default function HomePage() {
 
               {step === "result" && result && (
                 <StepFrame key="result">
-                  <div className="flex h-full flex-col gap-3">
+                  <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto pr-0.5">
                     <div>
-                      <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">KÜLDETÉS TELJESÍTVE</p>
-                      <h2 className="mission-title mt-2 font-display text-[34px] uppercase leading-[0.9] text-champagne sm:text-[38px]">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brass sm:text-sm sm:tracking-[0.28em]">
+                        KÜLDETÉS TELJESÍTVE
+                      </p>
+                      <h2 className="mission-title mt-1 font-display text-[28px] uppercase leading-[0.88] text-champagne sm:mt-2 sm:text-[38px]">
                         Hivatalos vőlegény elemzés
                       </h2>
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="grid gap-1.5">
                       <ScoreRow label="Megjelenés" value={result.averages.looks} />
                       <ScoreRow label="Stílus" value={result.averages.style} />
                       <ScoreRow label="Kisugárzás" value={result.averages.humor} />
@@ -367,14 +369,14 @@ export default function HomePage() {
                       <ScoreRow label="Férj index" value={result.averages.husband_index} />
                     </div>
 
-                    <div className="approval-glow mt-auto rounded-2xl border border-approval/40 bg-approval/12 p-3 text-center">
-                      <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-approval text-black">
-                        <ShieldCheck size={30} />
+                    <div className="approval-glow rounded-xl border border-approval/40 bg-approval/12 p-2.5 text-center sm:mt-auto sm:rounded-2xl sm:p-3">
+                      <div className="mx-auto mb-1.5 grid size-10 place-items-center rounded-full bg-approval text-black sm:mb-2 sm:size-12">
+                        <ShieldCheck size={24} className="sm:size-[30px]" />
                       </div>
-                      <p className="text-xl font-black uppercase tracking-[0.08em] text-approval">
+                      <p className="text-lg font-black uppercase leading-none tracking-[0.06em] text-approval sm:text-xl sm:tracking-[0.08em]">
                         {getHungarianVerdict(result.verdict)}
                       </p>
-                      <p className="mt-2 text-balance text-sm font-semibold leading-5 text-champagne/85">
+                      <p className="mt-1.5 text-balance text-xs font-semibold leading-4 text-champagne/85 sm:mt-2 sm:text-sm sm:leading-5">
                         Az értékelés alapján Martin házasságra alkalmas. Fanni döntése indokoltnak tűnik.
                       </p>
                       {(!result.saved || result.demo) && (
@@ -572,10 +574,12 @@ function PrimaryButton({
 
 function ScoreRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-champagne/12 bg-black/36 px-4 py-2.5">
-      <div className="mb-1.5 flex items-center justify-between gap-3">
-        <span className="text-sm font-black uppercase tracking-[0.16em] text-champagne/72">{label}</span>
-        <span className="text-lg font-black text-white">{value.toFixed(1)}</span>
+    <div className="rounded-xl border border-champagne/12 bg-black/36 px-3 py-2 sm:px-4 sm:py-2.5">
+      <div className="mb-1 flex items-center justify-between gap-3 sm:mb-1.5">
+        <span className="text-xs font-black uppercase tracking-[0.14em] text-champagne/72 sm:text-sm sm:tracking-[0.16em]">
+          {label}
+        </span>
+        <span className="text-base font-black text-white sm:text-lg">{value.toFixed(1)}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
         <div className="h-full rounded-full bg-brass" style={{ width: `${Math.max(0, Math.min(100, value * 10))}%` }} />
